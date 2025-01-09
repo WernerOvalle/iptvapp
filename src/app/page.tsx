@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Image from "next/image"
 import userData from '@/data/users.json'
+import { LogOut } from "lucide-react"  // Add this import at the top
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -97,9 +98,10 @@ export default function Home() {
           <div className="flex justify-between w-full mb-1">
             <ThemeToggle />
             {isLoggedIn && (
-              <Button variant="outline" onClick={handleLogout}>
-                Cerrar Sesión
-              </Button>
+              <Button variant="outline" onClick={handleLogout} className="p-2 md:px-4">
+              <LogOut className="h-5 w-5 md:hidden" />
+              <span className="hidden md:inline">Cerrar Sesión</span>
+            </Button>
             )}
           </div>
         </div>

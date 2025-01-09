@@ -16,8 +16,6 @@ export function ChannelList() {
       if (category) {
         const response = await fetch(category.url);
         const data = await response.text();
-        // Parse m3u8 playlist and extract channels
-        // This is a simplified version
         const lines = data.split('\n');
         const parsedChannels = [];
         for (let i = 0; i < lines.length; i++) {
@@ -35,18 +33,27 @@ export function ChannelList() {
   }, [selectedCategory]);
 
   return (
-    <Tabs defaultValue={categories[0].id} onValueChange={setSelectedCategory}>
-      <TabsList className="grid grid-cols-7 w-full">
+    <Tabs defaultValue={categories[0].id} onValueChange={setSelectedCategory} className="w-full max-w-[1200px] mx-auto px-4">
+    <div className="flex justify-center w-full">
+      <TabsList className="flex overflow-x-auto gap-2 max-w-full mb-4 justify-center">
         {categories.map((category) => (
-          <TabsTrigger key={category.id} value={category.id}>
+          <TabsTrigger 
+            key={category.id} 
+            value={category.id}
+            className="whitespace-nowrap flex-shrink-0"
+          >
             {category.name}
           </TabsTrigger>
         ))}
       </TabsList>
-      {categories.map((category) => (
-        <TabsContent key={category.id} value={category.id}>
-          <ScrollArea className="h-[calc(100vh-8rem)] w-full px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    </div>{categories.map((category) => (
+        <TabsContent 
+          key={category.id} 
+          value={category.id}
+          className="w-full"
+        >
+          <ScrollArea className="h-[calc(100vh-8rem)] w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
               {channels.map((channel, index) => (
                 <ChannelCard
                   key={index}
