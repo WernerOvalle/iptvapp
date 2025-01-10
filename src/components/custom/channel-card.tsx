@@ -2,16 +2,18 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
 import { VideoPlayer } from "./video-player"
 
 interface ChannelCardProps {
+  id: string;
   name: string;
   url: string;
+  playingChannel: string | null;
+  setPlayingChannel: (id: string | null) => void;
 }
 
-export function ChannelCard({ name, url }: ChannelCardProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
+export function ChannelCard({ id, name, url, playingChannel, setPlayingChannel }: ChannelCardProps) {
+  const isPlaying = playingChannel === id;
 
   return (
     <Card className="w-full">
@@ -24,8 +26,8 @@ export function ChannelCard({ name, url }: ChannelCardProps) {
             <VideoPlayer src={url} />
           </div>
         ) : (
-          <Button 
-            onClick={() => setIsPlaying(true)}
+          <Button
+            onClick={() => setPlayingChannel(id)}
             className="w-full"
           >
             Ver Ahora
