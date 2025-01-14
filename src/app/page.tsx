@@ -9,10 +9,22 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Image from "next/image"
 import userData from '@/data/users.json'
-import { LogOut } from "lucide-react"  // Add this import at the top
+import { LogOut } from "lucide-react"
+
+// Helper function to generate a session token
+const generateSessionToken = () => {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36)
+}
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
 
   return (
     <Button
@@ -32,14 +44,31 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [currentUser, setCurrentUser] = useState<{name: string, email: string} | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Verificar si hay una sesión guardada
-    const savedUser = localStorage.getItem('currentUser')
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser))
-      setIsLoggedIn(true)
-      setShowLoginModal(false)
+    setMounted(true)
+    const savedSession = localStorage.getItem('userSession')
+    if (savedSession) {
+      try {
+        const userSession = JSON.parse(savedSession)
+        const userExists = userData.users.find(user => user.email === userSession.email)
+        
+        if (userExists) {
+          setCurrentUser({
+            name: userSession.name,
+            email: userSession.email
+          })
+          setIsLoggedIn(true)
+          setShowLoginModal(false)
+        } else {
+          localStorage.removeItem('userSession')
+          setError('Session expired')
+        }
+      } catch (error) {
+        localStorage.removeItem('userSession')
+        setError('Invalid session')
+      }
     }
   }, [])
 
@@ -53,7 +82,6 @@ export default function Home() {
     const password = formData.get("password") as string
 
     try {
-      // Buscar usuario en el JSON
       const user = userData.users.find(
         u => u.email === email && u.password === password
       )
@@ -61,12 +89,16 @@ export default function Home() {
       if (user) {
         const userInfo = {
           email: user.email,
-          name: user.name
+          name: user.name,
+          sessionToken: generateSessionToken()
         }
-        setCurrentUser(userInfo)
+        setCurrentUser({
+          email: user.email,
+          name: user.name
+        })
         setIsLoggedIn(true)
         setShowLoginModal(false)
-        localStorage.setItem('currentUser', JSON.stringify(userInfo))
+        localStorage.setItem('userSession', JSON.stringify(userInfo))
       } else {
         setError("Credenciales inválidas")
       }
@@ -81,8 +113,10 @@ export default function Home() {
     setIsLoggedIn(false)
     setCurrentUser(null)
     setShowLoginModal(true)
-    localStorage.removeItem('currentUser')
+    localStorage.removeItem('userSession')
   }
+
+  if (!mounted) return null
 
   return (
     <ThemeProvider attribute="class" defaultTheme="light">
@@ -99,16 +133,16 @@ export default function Home() {
             <ThemeToggle />
             {isLoggedIn && (
               <Button variant="outline" onClick={handleLogout} className="p-2 md:px-4">
-              <LogOut className="h-5 w-5 md:hidden" />
-              <span className="hidden md:inline">Cerrar Sesión</span>
-            </Button>
+                <LogOut className="h-5 w-5 md:hidden" />
+                <span className="hidden md:inline">Cerrar Sesión</span>
+              </Button>
             )}
           </div>
         </div>
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4">Bienvenido a IPTV Buster App</h1>
           {currentUser && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Bienvenido, {currentUser.name}
             </p>
           )}
