@@ -43,7 +43,7 @@ export default function Home() {
   const [showLoginModal, setShowLoginModal] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [currentUser, setCurrentUser] = useState<{name: string, email: string} | null>(null)
+  const [currentUser, setCurrentUser] = useState<{ name: string, email: string } | null>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function Home() {
       try {
         const userSession = JSON.parse(savedSession)
         const userExists = userData.users.find(user => user.email === userSession.email)
-        
+
         if (userExists) {
           setCurrentUser({
             name: userSession.name,
@@ -76,7 +76,7 @@ export default function Home() {
     e.preventDefault()
     setIsLoading(true)
     setError("")
-    
+
     const formData = new FormData(e.target as HTMLFormElement)
     const email = formData.get("email") as string
     const password = formData.get("password") as string
@@ -122,13 +122,6 @@ export default function Home() {
     <ThemeProvider attribute="class" defaultTheme="light">
       <main className="container mx-auto p-4 dark:bg-gray-900 min-h-screen">
         <div className="flex flex-col items-center">
-          <Image
-            src="/logo.png"
-            alt="IPTV App Logo"
-            width={150}
-            height={150}
-            className="rounded-full object-cover"
-          />
           <div className="flex justify-between w-full mb-1">
             <ThemeToggle />
             {isLoggedIn && (
@@ -140,14 +133,22 @@ export default function Home() {
           </div>
         </div>
         <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">Bienvenido a IPTV Buster App</h1>
+          <div className="flex items-center justify-center gap-4">
+            <Image
+              src="/logo.png"
+              alt="IPTV App Logo"
+              width={50}
+              height={50}
+              className="rounded-full object-cover"
+            />
+            <h1 className="text-3xl font-bold mb-4">Bienvenido a IPTV Buster App</h1>
+          </div>
           {currentUser && (
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Bienvenido, {currentUser.name}
             </p>
           )}
         </div>
-
         <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
