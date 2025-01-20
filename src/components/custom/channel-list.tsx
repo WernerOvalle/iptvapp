@@ -24,11 +24,19 @@ export function ChannelList() {
         const parsedChannels = [];
         for (let i = 0; i < lines.length; i++) {
           if (lines[i].startsWith('#EXTINF')) {
-            const name = lines[i].split(',')[1];
-            const url = lines[i + 1];
-            parsedChannels.push({ name, url });
+
+              const logoMatch = lines[i].match(/tvg-logo="([^"]*)"/)
+              const logo = logoMatch ? logoMatch[1] : '';
+              
+              const name = lines[i].split(',')[1];
+              const url = lines[i + 1];
+              parsedChannels.push({ 
+                  name, 
+                  url,
+                  logo 
+              });
           }
-        }
+      }
         setChannels(parsedChannels);
       }
     };
@@ -104,6 +112,7 @@ export function ChannelList() {
                   id={channel.id || index.toString()}
                   name={channel.name}
                   url={channel.url}
+                  logo={channel.logo}
                   playingChannel={playingChannel}
                   setPlayingChannel={setPlayingChannel}
                 />
