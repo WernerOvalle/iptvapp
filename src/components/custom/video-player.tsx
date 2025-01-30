@@ -6,19 +6,19 @@ import Hls from 'hls.js';
 interface VideoPlayerProps {
   src: string;
 }
-
+interface FullScreenElement extends HTMLVideoElement {
+  webkitRequestFullscreen?: () => Promise<void>;
+  mozRequestFullScreen?: () => Promise<void>;
+  msRequestFullscreen?: () => Promise<void>;
+}
 export function VideoPlayer({ src }: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<FullScreenElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
   const enterFullscreen = () => {
     if (videoRef.current) {
-      if (videoRef.current.requestFullscreen) {
+      if (document.fullscreenEnabled && videoRef.current.requestFullscreen) {
         videoRef.current.requestFullscreen();
-      } else if (videoRef.current.webkitRequestFullscreen) {
-        videoRef.current.webkitRequestFullscreen();
-      } else if (videoRef.current.msRequestFullscreen) {
-        videoRef.current.msRequestFullscreen();
       }
     }
   };
