@@ -1,3 +1,5 @@
+// src/components/custom/channel-card.tsx
+import { Star } from 'lucide-react' // Add this import
 import Image from 'next/image'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,9 +12,20 @@ interface ChannelCardProps {
   logo: string;
   playingChannel: string | null;
   setPlayingChannel: (id: string | null) => void;
+  isFavorite: boolean;
+  onToggleFavorite: (channel: { id: string; name: string; url: string; logo: string }) => void;
 }
 
-export function ChannelCard({ id, name, url, logo, playingChannel, setPlayingChannel }: ChannelCardProps) {
+export function ChannelCard({ 
+  id, 
+  name, 
+  url, 
+  logo, 
+  playingChannel, 
+  setPlayingChannel,
+  isFavorite,
+  onToggleFavorite 
+}: ChannelCardProps) {
   const isPlaying = playingChannel === id;
 
   return (
@@ -33,7 +46,17 @@ export function ChannelCard({ id, name, url, logo, playingChannel, setPlayingCha
             </div>
           )}
         </div>
-        <CardTitle className="text-lg">{name}</CardTitle>
+        <div className="flex flex-1 items-center justify-between">
+          <CardTitle className="text-lg">{name}</CardTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onToggleFavorite({ id, name, url, logo })}
+            className={isFavorite ? "text-yellow-500" : "text-gray-400"}
+          >
+            <Star className="h-5 w-5" fill={isFavorite ? "currentColor" : "none"} />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {isPlaying ? (
