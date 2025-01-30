@@ -8,13 +8,9 @@ import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Image from "next/image"
-import userData from '@/data/users.json'
 import { LogOut } from "lucide-react"
+import { supabase } from '@/lib/supabase'
 
-// Helper function to generate a session token
-const generateSessionToken = () => {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36)
-}
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -48,28 +44,21 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true)
-    const savedSession = localStorage.getItem('userSession')
-    if (savedSession) {
-      try {
-        const userSession = JSON.parse(savedSession)
-        const userExists = userData.users.find(user => user.email === userSession.email)
-
-        if (userExists) {
-          setCurrentUser({
-            name: userSession.name,
-            email: userSession.email
-          })
-          setIsLoggedIn(true)
-          setShowLoginModal(false)
-        } else {
-          localStorage.removeItem('userSession')
-          setError('Session expired')
-        }
-      } catch (error) {
-        localStorage.removeItem('userSession')
-        setError('Invalid session')
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setCurrentUser({
+          name: session.user.email?.split('@')[0] || '',
+          email: session.user.email || ''
+        })
+        setIsLoggedIn(true)
+        setShowLoginModal(false)
+      } else {
+        setIsLoggedIn(false)
+        setCurrentUser(null)
       }
-    }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -82,38 +71,24 @@ export default function Home() {
     const password = formData.get("password") as string
 
     try {
-      const user = userData.users.find(
-        u => u.email === email && u.password === password
-      )
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
 
-      if (user) {
-        const userInfo = {
-          email: user.email,
-          name: user.name,
-          sessionToken: generateSessionToken()
-        }
-        setCurrentUser({
-          email: user.email,
-          name: user.name
-        })
-        setIsLoggedIn(true)
-        setShowLoginModal(false)
-        localStorage.setItem('userSession', JSON.stringify(userInfo))
-      } else {
-        setError("Credenciales inválidas")
-      }
-    } catch (err) {
-      setError("Error al iniciar sesión")
+      if (error) throw error
+
+      setShowLoginModal(false)
+    } catch (err: any) {
+      setError(err.message)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleLogout = () => {
-    setIsLoggedIn(false)
-    setCurrentUser(null)
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
     setShowLoginModal(true)
-    localStorage.removeItem('userSession')
   }
 
   if (!mounted) return null
@@ -190,8 +165,15 @@ export default function Home() {
         {isLoggedIn ? (
           <ChannelList />
         ) : (
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 space-y-4">
             <p>Por favor inicie sesión para ver los canales</p>
+            <Button
+              variant="default"
+              onClick={() => setShowLoginModal(true)}
+              className="px-6 py-2"
+            >
+              Iniciar Sesión
+            </Button>
           </div>
         )}
       </main>
