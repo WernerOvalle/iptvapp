@@ -84,11 +84,18 @@ export function ChannelList() {
   const filteredFavorites = favorites.filter(channel =>
     channel.name?.toLowerCase().includes(searchQuery?.toLowerCase() || '')
   );
-
+// After existing filteredFavorites definition, add:
+const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
     <div className="flex">
-      {/* Sidebar */}
-      <div className="hidden md:flex flex-col w-64 border-r h-screen">
+    {/* Mobile Hamburger Button */}
+    <div className="p-2 md:hidden">
+      <button onClick={() => setIsSidebarOpen(prev => !prev)} className="p-2 border rounded">
+        <Menu className="h-6 w-6" />
+      </button>
+    </div>
+    {/* Sidebar */}
+    <div className={`flex flex-col w-64 border-r h-screen ${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
         <ScrollArea className="flex-1">
           <div className="space-y-1 p-2">
             <Button
