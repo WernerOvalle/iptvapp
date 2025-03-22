@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Image from "next/image"
 import { LogOut } from "lucide-react"
-import { supabase } from '@/lib/supabase'
+// Remove supabase import
+// import { supabase } from '@/lib/supabase'
 
 
 function ThemeToggle() {
@@ -35,30 +36,18 @@ function ThemeToggle() {
 }
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [showLoginModal, setShowLoginModal] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(true)
+  const [showLoginModal, setShowLoginModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [currentUser, setCurrentUser] = useState<{ name: string, email: string } | null>(null)
+  const [currentUser, setCurrentUser] = useState<{ name: string, email: string } | null>({
+    name: 'User', 
+    email: 'user@example.com'
+  })
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        setCurrentUser({
-          name: session.user.email?.split('@')[0] || '',
-          email: session.user.email || ''
-        })
-        setIsLoggedIn(true)
-        setShowLoginModal(false)
-      } else {
-        setIsLoggedIn(false)
-        setCurrentUser(null)
-      }
-    })
-
-    return () => subscription.unsubscribe()
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -66,28 +55,28 @@ export default function Home() {
     setIsLoading(true)
     setError("")
 
-    const formData = new FormData(e.target as HTMLFormElement)
-    const email = formData.get("email") as string
-    const password = formData.get("password") as string
-
+    // Mock successful login without Supabase
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      setIsLoggedIn(true)
+      setCurrentUser({
+        name: 'User',
+        email: 'user@example.com'
       })
-
-      if (error) throw error
-
       setShowLoginModal(false)
     } catch (err: any) {
-      setError(err.message)
+      setError("Error logging in")
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    // Mock logout without Supabase
+    setIsLoggedIn(false)
+    setCurrentUser(null)
     setShowLoginModal(true)
   }
 
